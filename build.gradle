@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+   mavenLocal()
+   mavenCentral()
+}
+
+
+dependencies {
+   compile 'org.projectlombok:lombok:1.16.18'
+   compile 'mysql:mysql-connector-java:5.1.44'
+   compile 'com.zaxxer:HikariCP:2.7.2'
+   compile 'org.slf4j:slf4j-simple:1.6.1'
+   compile 'log4j:log4j:1.2.17'
+   compile 'com.mihnita:color-loggers:1.0.5'
+   compile 'org.lazyluke:log4jdbc-remix:0.2.7'
+   compile 'org.slf4j:slf4j-log4j12:1.7.10'
+//   compile 'org.slf4j:slf4j-api:1.7.21'
+   compile files('./lib/config-parser-v1.0.0.jar')
+   compile files('./lib/verify-v1.0.0.jar')
+   compile files('./lib/jext-v1.0.0.jar')
+   testCompile 'junit:junit:4.12'
+}
+
