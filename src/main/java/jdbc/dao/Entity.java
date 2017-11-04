@@ -40,14 +40,6 @@ public abstract class Entity<T> implements Comparable<Entity<T>>, Serializable {
       return 0;
    }
    
-   public Class<?> getEntityClass() {
-      return entityClass;
-   }
-   
-   public Class<?> entityClass() {
-      return getEntityClass();
-   }
-   
    public Long getId() {
       return id;
    }

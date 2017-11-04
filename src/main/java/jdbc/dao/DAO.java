@@ -24,8 +24,4 @@ public class DAO {
       System.out.printf("INSERT %s", object);
    }
    
-//   public static <T extends Entity<?>> void insert(T o) {
-//      System.out.printf("INSERT %s\n", o);
-//   }
-   
 }
