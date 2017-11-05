@@ -3,6 +3,7 @@ package jdbc.dao.entity;
 import org.junit.Test;
 
 import jdbc.dao.DAO;
+import jdbc.dao.DataSource;
 
 /**
  * @author thiago-amm
@@ -18,6 +19,13 @@ public class EntityTest {
       DAO pessoaDAO = DAO.of(Pessoa.class);
       Pessoa pessoa = Pessoa.of();
       pessoaDAO.insert(pessoa);
+      DataSource devDS = new DataSource();
+      devDS.user("cadservidor");
+      devDS.password("cadservidor");
+      devDS.database("cadservidor");
+      System.out.println(devDS.getURL());
+      System.out.println(devDS.connection());
+      System.out.println(devDS.enviroment());
    }
    
 }
