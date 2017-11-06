@@ -26,4 +26,9 @@ public enum Enviroment {
       return getValue();
    }
    
+   @Override
+   public String toString() {
+      return super.toString().toLowerCase();
+   }
+   
 }

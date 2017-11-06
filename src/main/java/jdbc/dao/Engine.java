@@ -5,9 +5,18 @@ package jdbc.dao;
  * @version v1.0.0 04/11/2017
  * @since v1.0.0
  */
-public enum DatabaseEngine {
+public enum Engine {
    
-   MYSQL("MySQL", "com.mysql.jdbc.Driver", "localhost", "root", 3306, "mysql", "jdbc:mysql://%s:%s/%s?user=%s&password=%s"),
+   MYSQL(
+      "MySQL", 
+      "com.mysql.jdbc.Driver", 
+      "localhost", 
+      "root", 
+      3306, 
+      "mysql", 
+//      "jdbc:mysql://%s:%s/%s?user=%s&password=%s&verifyServerCertificate=%s&useSSL=%s&autoReconnect=%s&autoReconnectForPools=%s"
+      "jdbc:mysql://%s:%s/%s?user=%s&password=%s&verifyServerCertificate=%s&useSSL=%s"
+   ),
    POSTGRESQL("PostgreSQL", "org.postgresql.Driver", "localhost", "postgres", 5432, "postgres", "jdbc:postgresql://%s:%s/%s"),
    ORACLE("Oracle", "oracle.jdbc.driver.OracleDriver", "localhost", "hr", 1521, "xe", "jdbc:oracle:thin:@%s:%s:%s"),
    SQLITE("SQLite", "org.sqlite.JDBC", "localhost", "", 0, "", ""),
@@ -21,7 +30,7 @@ public enum DatabaseEngine {
    private final String database;
    private final String url;
    
-   private DatabaseEngine(String value, String driver, String host, String user, Integer port, String database, String url) {
+   private Engine(String value, String driver, String host, String user, Integer port, String database, String url) {
       this.value = value;
       this.driver = driver;
       this.host = host;
