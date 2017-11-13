@@ -5,7 +5,7 @@ package jdbc.dao;
  * @version v1.0.0 04/11/2017
  * @since v1.0.0
  */
-public enum Enviroment {
+public enum Environment {
    
    DEVELOPMENT("Development"),
    TEST("Test"),
@@ -14,7 +14,7 @@ public enum Enviroment {
    
    private final String value;
    
-   private Enviroment(String value) {
+   private Environment(String value) {
       this.value = value;
    }
    

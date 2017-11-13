@@ -9,7 +9,7 @@ public enum Pool {
    
    NONE("None"),
    C3P0("C3P0"),
-   HIKARI("Hikari");
+   HIKARICP("HikariCP");
    
    private final String value;
    

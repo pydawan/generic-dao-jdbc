@@ -7,7 +7,7 @@ package jdbc.dao;
  */
 public class DataSourceConfig {
    
-   private Enviroment enviroment;
+   private Environment environment;
    private Engine engine;
    private Pool pool;
    private String host;
@@ -28,9 +28,9 @@ public class DataSourceConfig {
    private String url;
    
    public DataSourceConfig() {
-      enviroment = Enviroment.DEVELOPMENT;
+      environment = Environment.DEVELOPMENT;
       engine = Engine.MYSQL;
-      pool = Pool.HIKARI;
+      pool = Pool.HIKARICP;
       host = "localhost";
       port = 3306;
       database = "";
@@ -53,20 +53,20 @@ public class DataSourceConfig {
       return new DataSourceConfig();
    }
    
-   public Enviroment getEnviroment() {
-      return enviroment;
+   public Environment getEnviroment() {
+      return environment;
    }
    
-   public Enviroment enviroment() {
+   public Environment enviroment() {
       return getEnviroment();
    }
    
-   public void setEnviroment(Enviroment enviroment) {
-      this.enviroment = enviroment == null ? Enviroment.DEVELOPMENT : enviroment;
+   public void setEnvironment(Environment environment) {
+      this.environment = environment == null ? Environment.DEVELOPMENT : environment;
    }
    
-   public DataSourceConfig enviroment(Enviroment enviroment) {
-      setEnviroment(enviroment);
+   public DataSourceConfig environment(Environment environment) {
+      setEnvironment(environment);
       return this;
    }
    
@@ -424,14 +424,14 @@ public class DataSourceConfig {
       this.url = url;
       return url;
    }
-
+   
    @Override
    public String toString() {
-      return "DataSourceConfig [enviroment=" + enviroment + ", engine=" + engine + ", pool=" + pool + ", host=" + host + ", port=" + port +
+      return "DataSourceConfig(enviroment=" + environment + ", engine=" + engine + ", pool=" + pool + ", host=" + host + ", port=" + port +
          ", database=" + database + ", user=" + user + ", password=" + password + ", charset=" + charset + ", collate=" + collate +
          ", autoReconnect=" + autoReconnect + ", autoReconnectForPools=" + autoReconnectForPools + ", autoCommit=" + autoCommit +
          ", autoClose=" + autoClose + ", useSSL=" + useSSL + ", verifyServerCertificate=" + verifyServerCertificate + ", logging=" +
-         logging + ", driver=" + driver + ", url=" + url + "]";
+         logging + ", driver=" + driver + ", url=" + url + ")";
    }
    
 }
