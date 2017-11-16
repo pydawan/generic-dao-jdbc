@@ -1,15 +1,46 @@
 package jdbc.dao;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.regex.Matcher;
 
 /**
  * @author thiago-amm
- * @version v1.0.0 04/11/2017
+ * @version v1.0.0 15/11/2017
  * @since v1.0.0
  */
 public class DataSource {
+   
+   private static final File FILE = new File(".");
+   public static final String REGEX_FILE_SEPARATOR = Matcher.quoteReplacement(File.separator);
+   public static final String FILE_SEPARATOR = File.separator.replaceAll("\\\\", "/");
+   public static final String PROJECT_DIR = FILE.getAbsolutePath().replace(".", "");
+   public static final String PROJECT_DIR_DATABASE_PROPERTIES = PROJECT_DIR + "database.properties";
+   
+   public static final String BIN_DIR = PROJECT_DIR + "bin/";
+   public static final String BUILD_DIR = PROJECT_DIR + "build/";
+   public static final String DOC_DIR = PROJECT_DIR + "doc/";
+   public static final String SRC_DIR = PROJECT_DIR + "src/";
+   public static final String LIB_DIR = PROJECT_DIR + "lib/";
+   
+   public static final String SRC_MAIN_DIR = SRC_DIR + "main/";
+   public static final String SRC_MAIN_JAVA_DIR = SRC_MAIN_DIR + "java/";
+   public static final String SRC_MAIN_RESOURCES_DIR = SRC_MAIN_DIR + "resources/";
+   public static final String SRC_MAIN_RESOURCES_DATABASE_PROPERTIES = SRC_MAIN_RESOURCES_DIR + "database.properties";
+   public static final String SRC_MAIN_RESOURCES_SQL_DIR = SRC_MAIN_RESOURCES_DIR + "sql/";
+   public static final String SRC_MAIN_RESOURCES_METAINF_DIR = SRC_MAIN_RESOURCES_DIR + "META-INF/";
+   public static final String SRC_MAIN_WEBAPP_DIR = SRC_MAIN_DIR + "webapp/";
+   public static final String SRC_MAIN_WEBAPP_METAINF_DIR = SRC_MAIN_WEBAPP_DIR + "META-INF/";
+   public static final String SRC_MAIN_WEBAPP_WEBINF_DIR = SRC_MAIN_WEBAPP_DIR + "WEB-INF/";
+   public static final String SRC_MAIN_WEBAPP_WEBINF__LIB_DIR = SRC_MAIN_WEBAPP_WEBINF_DIR + "lib/";
+   public static final String SRC_MAIN_WEBAPP_WEBINF_DATABASE_PROPERTIES = SRC_MAIN_WEBAPP_WEBINF_DIR + "database.properties";
+   
+   public static final String SRC_TEST_DIR = SRC_MAIN_DIR.replace("main", "test");
+   public static final String SRC_TEST_JAVA_DIR = SRC_MAIN_JAVA_DIR.replace("main", "test");
+   public static final String SRC_TEST_RESOURCES_DIR = SRC_MAIN_RESOURCES_DIR.replace("main", "test");
+   public static final String SRC_TEST_RESOURCES_DATABASE_PROPERTIES = SRC_TEST_RESOURCES_DIR + "database.properties";
    
    private DataSourceConfig config;
    
@@ -36,6 +67,30 @@ public class DataSource {
    public DataSource config(DataSourceConfig config) {
       setConfig(config);
       return this;
+   }
+   
+   public static boolean isWindows() {
+      boolean isWindows = false;
+      if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+         isWindows = true;
+      }
+      return isWindows;
+   }
+   
+   public static boolean isLinux() {
+      boolean isWindows = false;
+      if (System.getProperty("os.name").toLowerCase().contains("linux")) {
+         isWindows = true;
+      }
+      return isWindows;
+   }
+   
+   public static String normalizeFilePath(String path) {
+      if (isWindows()) {
+         path = path.replace("\\", "/");
+         path = path.substring(0, 1).equals("/") ? path.substring(1) : path;
+      }
+      return path;
    }
    
    public Connection getConnection() {
@@ -234,7 +289,7 @@ public class DataSource {
                continue;
             }
          }
-         //System.out.println(config);
+         // System.out.println(config);
          try {
             Class.forName(config.getDriver());
             connection = DriverManager.getConnection(config.getUrl());
