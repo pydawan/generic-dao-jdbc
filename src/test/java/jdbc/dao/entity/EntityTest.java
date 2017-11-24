@@ -87,6 +87,7 @@ public class EntityTest {
       ConfigParser cfg = new ConfigParser();
       cfg.read("main:database.properties");
       cfg.sections().forEach(section -> cfg.items(section).forEach(System.out::println));
+      DataSourceConfig.load();
    }
    
 }

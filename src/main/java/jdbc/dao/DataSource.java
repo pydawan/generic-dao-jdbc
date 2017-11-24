@@ -1,10 +1,8 @@
 package jdbc.dao;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.regex.Matcher;
 
 /**
  * @author thiago-amm
@@ -12,35 +10,6 @@ import java.util.regex.Matcher;
  * @since v1.0.0
  */
 public class DataSource {
-   
-   private static final File FILE = new File(".");
-   public static final String REGEX_FILE_SEPARATOR = Matcher.quoteReplacement(File.separator);
-   public static final String FILE_SEPARATOR = File.separator.replaceAll("\\\\", "/");
-   public static final String PROJECT_DIR = FILE.getAbsolutePath().replace(".", "");
-   public static final String PROJECT_DIR_DATABASE_PROPERTIES = PROJECT_DIR + "database.properties";
-   
-   public static final String BIN_DIR = PROJECT_DIR + "bin/";
-   public static final String BUILD_DIR = PROJECT_DIR + "build/";
-   public static final String DOC_DIR = PROJECT_DIR + "doc/";
-   public static final String SRC_DIR = PROJECT_DIR + "src/";
-   public static final String LIB_DIR = PROJECT_DIR + "lib/";
-   
-   public static final String SRC_MAIN_DIR = SRC_DIR + "main/";
-   public static final String SRC_MAIN_JAVA_DIR = SRC_MAIN_DIR + "java/";
-   public static final String SRC_MAIN_RESOURCES_DIR = SRC_MAIN_DIR + "resources/";
-   public static final String SRC_MAIN_RESOURCES_DATABASE_PROPERTIES = SRC_MAIN_RESOURCES_DIR + "database.properties";
-   public static final String SRC_MAIN_RESOURCES_SQL_DIR = SRC_MAIN_RESOURCES_DIR + "sql/";
-   public static final String SRC_MAIN_RESOURCES_METAINF_DIR = SRC_MAIN_RESOURCES_DIR + "META-INF/";
-   public static final String SRC_MAIN_WEBAPP_DIR = SRC_MAIN_DIR + "webapp/";
-   public static final String SRC_MAIN_WEBAPP_METAINF_DIR = SRC_MAIN_WEBAPP_DIR + "META-INF/";
-   public static final String SRC_MAIN_WEBAPP_WEBINF_DIR = SRC_MAIN_WEBAPP_DIR + "WEB-INF/";
-   public static final String SRC_MAIN_WEBAPP_WEBINF__LIB_DIR = SRC_MAIN_WEBAPP_WEBINF_DIR + "lib/";
-   public static final String SRC_MAIN_WEBAPP_WEBINF_DATABASE_PROPERTIES = SRC_MAIN_WEBAPP_WEBINF_DIR + "database.properties";
-   
-   public static final String SRC_TEST_DIR = SRC_MAIN_DIR.replace("main", "test");
-   public static final String SRC_TEST_JAVA_DIR = SRC_MAIN_JAVA_DIR.replace("main", "test");
-   public static final String SRC_TEST_RESOURCES_DIR = SRC_MAIN_RESOURCES_DIR.replace("main", "test");
-   public static final String SRC_TEST_RESOURCES_DATABASE_PROPERTIES = SRC_TEST_RESOURCES_DIR + "database.properties";
    
    private DataSourceConfig config;
    

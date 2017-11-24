@@ -1,11 +1,55 @@
 package jdbc.dao;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Properties;
+import java.util.regex.Matcher;
+
 /**
  * @author thiago-amm
  * @version v1.0.0 05/11/2017
  * @since v1.0.0
  */
 public class DataSourceConfig {
+   
+   private static final File FILE = new File(".");
+   private static String exceptionMessage;
+   
+   public static final String REGEX_FILE_SEPARATOR = Matcher.quoteReplacement(File.separator);
+   public static final String FILE_SEPARATOR = File.separator.replaceAll("\\\\", "/");
+   public static final String PROJECT_DIR = FILE.getAbsolutePath().replace(".", "");
+   public static final String PROJECT_DIR_DATABASE_PROPERTIES = PROJECT_DIR + "database.properties";
+   
+   public static final String BIN_DIR = PROJECT_DIR + "bin/";
+   public static final String BUILD_DIR = PROJECT_DIR + "build/";
+   public static final String DOC_DIR = PROJECT_DIR + "doc/";
+   public static final String SRC_DIR = PROJECT_DIR + "src/";
+   public static final String LIB_DIR = PROJECT_DIR + "lib/";
+   
+   public static final String SRC_MAIN_DIR = SRC_DIR + "main/";
+   public static final String SRC_MAIN_JAVA_DIR = SRC_MAIN_DIR + "java/";
+   public static final String SRC_MAIN_RESOURCES_DIR = SRC_MAIN_DIR + "resources/";
+   public static final String SRC_MAIN_RESOURCES_DATABASE_PROPERTIES = SRC_MAIN_RESOURCES_DIR + "database.properties";
+   public static final String SRC_MAIN_RESOURCES_SQL_DIR = SRC_MAIN_RESOURCES_DIR + "sql/";
+   public static final String SRC_MAIN_RESOURCES_METAINF_DIR = SRC_MAIN_RESOURCES_DIR + "META-INF/";
+   public static final String SRC_MAIN_WEBAPP_DIR = SRC_MAIN_DIR + "webapp/";
+   public static final String SRC_MAIN_WEBAPP_METAINF_DIR = SRC_MAIN_WEBAPP_DIR + "META-INF/";
+   public static final String SRC_MAIN_WEBAPP_WEBINF_DIR = SRC_MAIN_WEBAPP_DIR + "WEB-INF/";
+   public static final String SRC_MAIN_WEBAPP_WEBINF__LIB_DIR = SRC_MAIN_WEBAPP_WEBINF_DIR + "lib/";
+   public static final String SRC_MAIN_WEBAPP_WEBINF_DATABASE_PROPERTIES = SRC_MAIN_WEBAPP_WEBINF_DIR + "database.properties";
+   
+   public static final String SRC_TEST_DIR = SRC_MAIN_DIR.replace("main", "test");
+   public static final String SRC_TEST_JAVA_DIR = SRC_MAIN_JAVA_DIR.replace("main", "test");
+   public static final String SRC_TEST_RESOURCES_DIR = SRC_MAIN_RESOURCES_DIR.replace("main", "test");
+   public static final String SRC_TEST_RESOURCES_DATABASE_PROPERTIES = SRC_TEST_RESOURCES_DIR + "database.properties";
+   
+   public static String DATABASE_PROPERTIES_PATH = null;
+   public static boolean DATABASE_PROPERTIES_LOADED = false;
+   public static FileInputStream DATABASE_PROPERTIES_FILE;
+   public static Properties DATABASE_PROPERTIES;
    
    private Environment environment;
    private Engine engine;
@@ -26,6 +70,35 @@ public class DataSourceConfig {
    private Boolean logging;
    private String driver;
    private String url;
+   
+   /**
+    * Carrega o arquivo de propriedades database.properties.
+    */
+   public static void load() {
+      try {
+         DATABASE_PROPERTIES_PATH = DataSourceConfig.class.getClassLoader().getResource("database.properties").getPath();
+         DATABASE_PROPERTIES_PATH = URLDecoder.decode(DATABASE_PROPERTIES_PATH, System.getProperty("file.encoding"));
+         File databaseProperties = new File(DATABASE_PROPERTIES_PATH);
+         if (databaseProperties.exists()) {
+            DATABASE_PROPERTIES_FILE = new FileInputStream(databaseProperties);
+         } else {
+            exceptionMessage = "ATENÇÃO: Não foi possível encontrar o arquivo de configurações database.properties!";
+            throw new IllegalStateException(exceptionMessage);
+         }
+         DATABASE_PROPERTIES = new Properties();
+         DATABASE_PROPERTIES.load(DATABASE_PROPERTIES_FILE);
+         for (Object o : DATABASE_PROPERTIES.keySet()) {
+            String key = o.toString().toLowerCase().trim();
+            String value = DATABASE_PROPERTIES.getProperty(key);
+            value = value == null ? "" : value.trim().toLowerCase();
+            System.out.println(value);
+         }
+      } catch (UnsupportedEncodingException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
    
    public DataSourceConfig() {
       environment = Environment.DEVELOPMENT;
