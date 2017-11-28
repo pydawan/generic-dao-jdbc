@@ -7,10 +7,10 @@ package jdbc.dao;
  */
 public enum Environment {
    
-   DEVELOPMENT("Development"),
-   TEST("Test"),
-   STAGE("Stage"),
-   PRODUCTION("Production");
+   DEVELOPMENT("development"),
+   TEST("test"),
+   STAGE("stage"),
+   PRODUCTION("production");
    
    private final String value;
    

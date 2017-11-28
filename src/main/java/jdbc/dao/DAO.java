@@ -62,6 +62,14 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       return 0;
    }
    
+   public Connection getConnection() {
+      return connection;
+   }
+   
+   public void setConnection(Connection connection) {
+      this.connection = connection;
+   }
+   
    public Long getId() {
       return id;
    }

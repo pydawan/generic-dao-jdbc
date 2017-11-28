@@ -7,9 +7,9 @@ package jdbc.dao;
  */
 public enum Pool {
    
-   NONE("None"),
-   C3P0("C3P0"),
-   HIKARICP("HikariCP");
+   NONE(""),
+   C3P0("c3p0"),
+   HIKARICP("hikaricp");
    
    private final String value;
    

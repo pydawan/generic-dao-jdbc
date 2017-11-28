@@ -38,30 +38,6 @@ public class DataSource {
       return this;
    }
    
-   public static boolean isWindows() {
-      boolean isWindows = false;
-      if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-         isWindows = true;
-      }
-      return isWindows;
-   }
-   
-   public static boolean isLinux() {
-      boolean isWindows = false;
-      if (System.getProperty("os.name").toLowerCase().contains("linux")) {
-         isWindows = true;
-      }
-      return isWindows;
-   }
-   
-   public static String normalizeFilePath(String path) {
-      if (isWindows()) {
-         path = path.replace("\\", "/");
-         path = path.substring(0, 1).equals("/") ? path.substring(1) : path;
-      }
-      return path;
-   }
-   
    public Connection getConnection() {
       Connection connection = null;
       try {
@@ -75,6 +51,21 @@ public class DataSource {
    
    public Connection connection() {
       return getConnection();
+   }
+   
+   private static Connection getConnection(DataSourceConfig config) {
+      Connection connection = null;
+      try {
+         Class.forName(config.getDriver());
+         connection = DriverManager.getConnection(config.getUrl());
+      } catch (ClassNotFoundException | SQLException e) {
+         e.printStackTrace();
+      }
+      return connection;
+   }
+   
+   private static Connection connection(DataSourceConfig config) {
+      return getConnection(config);
    }
    
    public static Connection connect(String... args) {
@@ -120,7 +111,9 @@ public class DataSource {
             }
             // Pool
             if (key.matches("^(pool)$")) {
-               if (value.matches("^(none)$")) {
+               if (value.isEmpty()) {
+                  config.setPool(Pool.NONE);
+               } else if (value.matches("^(none)$")) {
                   config.setPool(Pool.NONE);
                } else if (value.matches("^(c3p0)$")) {
                   config.setPool(Pool.C3P0);
@@ -267,6 +260,63 @@ public class DataSource {
          }
       }
       return connection;
+   }
+   
+   public static Connection connect(DataSourceConfig config) {
+      Connection connection = null;
+      if (config != null) {
+         connection = connection(config);
+      }
+      return connection;
+   }
+   
+   public static Connection getConnection(String path, Environment environment) {
+      Connection connection = null;
+      DataSourceConfig config = null;
+      path = path == null ? "main:database.properties" : path;
+      environment = environment == null ? Environment.DEVELOPMENT : environment;
+      switch (environment.toString()) {
+         case "development":
+            config = DatabaseProperties.getDevelopment(path);
+         break;
+         case "test":
+            config = DatabaseProperties.getTest(path);
+         break;
+         case "stage":
+            config = DatabaseProperties.getStage(path);
+         break;
+         case "production":
+            config = DatabaseProperties.getProduction(path);
+         break;
+         default:
+            config = DatabaseProperties.getDevelopment();
+      }
+      connection = getConnection(config);
+      return connection;
+   }
+   
+   public static Connection getConnection(String path) {
+      return getConnection(path, (Environment) null);
+   }
+   
+   public static Connection getConnection(Environment environment) {
+      return getConnection(null, environment);
+   }
+   
+   public static Connection connect(String path, Environment environment) {
+      return getConnection(path, environment);
+   }
+   
+   public static Connection connect(String path) {
+      return getConnection(path, null);
+   }
+   
+   public static Connection connect(Environment environment) {
+      return getConnection(null, environment);
+   }
+   
+   public static Connection connect() {
+      return getConnection(null, null);
    }
    
    public static String environment(String environment) {

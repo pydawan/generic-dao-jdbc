@@ -1,12 +1,6 @@
 package jdbc.dao;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Properties;
-import java.util.regex.Matcher;
+import br.org.configparser.ConfigParser;
 
 /**
  * @author thiago-amm
@@ -14,42 +8,6 @@ import java.util.regex.Matcher;
  * @since v1.0.0
  */
 public class DataSourceConfig {
-   
-   private static final File FILE = new File(".");
-   private static String exceptionMessage;
-   
-   public static final String REGEX_FILE_SEPARATOR = Matcher.quoteReplacement(File.separator);
-   public static final String FILE_SEPARATOR = File.separator.replaceAll("\\\\", "/");
-   public static final String PROJECT_DIR = FILE.getAbsolutePath().replace(".", "");
-   public static final String PROJECT_DIR_DATABASE_PROPERTIES = PROJECT_DIR + "database.properties";
-   
-   public static final String BIN_DIR = PROJECT_DIR + "bin/";
-   public static final String BUILD_DIR = PROJECT_DIR + "build/";
-   public static final String DOC_DIR = PROJECT_DIR + "doc/";
-   public static final String SRC_DIR = PROJECT_DIR + "src/";
-   public static final String LIB_DIR = PROJECT_DIR + "lib/";
-   
-   public static final String SRC_MAIN_DIR = SRC_DIR + "main/";
-   public static final String SRC_MAIN_JAVA_DIR = SRC_MAIN_DIR + "java/";
-   public static final String SRC_MAIN_RESOURCES_DIR = SRC_MAIN_DIR + "resources/";
-   public static final String SRC_MAIN_RESOURCES_DATABASE_PROPERTIES = SRC_MAIN_RESOURCES_DIR + "database.properties";
-   public static final String SRC_MAIN_RESOURCES_SQL_DIR = SRC_MAIN_RESOURCES_DIR + "sql/";
-   public static final String SRC_MAIN_RESOURCES_METAINF_DIR = SRC_MAIN_RESOURCES_DIR + "META-INF/";
-   public static final String SRC_MAIN_WEBAPP_DIR = SRC_MAIN_DIR + "webapp/";
-   public static final String SRC_MAIN_WEBAPP_METAINF_DIR = SRC_MAIN_WEBAPP_DIR + "META-INF/";
-   public static final String SRC_MAIN_WEBAPP_WEBINF_DIR = SRC_MAIN_WEBAPP_DIR + "WEB-INF/";
-   public static final String SRC_MAIN_WEBAPP_WEBINF__LIB_DIR = SRC_MAIN_WEBAPP_WEBINF_DIR + "lib/";
-   public static final String SRC_MAIN_WEBAPP_WEBINF_DATABASE_PROPERTIES = SRC_MAIN_WEBAPP_WEBINF_DIR + "database.properties";
-   
-   public static final String SRC_TEST_DIR = SRC_MAIN_DIR.replace("main", "test");
-   public static final String SRC_TEST_JAVA_DIR = SRC_MAIN_JAVA_DIR.replace("main", "test");
-   public static final String SRC_TEST_RESOURCES_DIR = SRC_MAIN_RESOURCES_DIR.replace("main", "test");
-   public static final String SRC_TEST_RESOURCES_DATABASE_PROPERTIES = SRC_TEST_RESOURCES_DIR + "database.properties";
-   
-   public static String DATABASE_PROPERTIES_PATH = null;
-   public static boolean DATABASE_PROPERTIES_LOADED = false;
-   public static FileInputStream DATABASE_PROPERTIES_FILE;
-   public static Properties DATABASE_PROPERTIES;
    
    private Environment environment;
    private Engine engine;
@@ -71,33 +29,20 @@ public class DataSourceConfig {
    private String driver;
    private String url;
    
-   /**
-    * Carrega o arquivo de propriedades database.properties.
-    */
-   public static void load() {
-      try {
-         DATABASE_PROPERTIES_PATH = DataSourceConfig.class.getClassLoader().getResource("database.properties").getPath();
-         DATABASE_PROPERTIES_PATH = URLDecoder.decode(DATABASE_PROPERTIES_PATH, System.getProperty("file.encoding"));
-         File databaseProperties = new File(DATABASE_PROPERTIES_PATH);
-         if (databaseProperties.exists()) {
-            DATABASE_PROPERTIES_FILE = new FileInputStream(databaseProperties);
-         } else {
-            exceptionMessage = "ATENÇÃO: Não foi possível encontrar o arquivo de configurações database.properties!";
-            throw new IllegalStateException(exceptionMessage);
+   public DataSourceConfig load(String filePath) {
+      DataSourceConfig dataSourceConfig = null;
+      filePath = filePath == null ? "" : filePath;
+      if (filePath.isEmpty() == false) {
+         try {
+            ConfigParser configParser = new ConfigParser();
+            configParser.read(filePath);
+            System.out.println("==> database.properties loading (start)");
+            System.out.println("==> database.properties loading (end)");
+         } catch (Exception e) {
+            e.printStackTrace();
          }
-         DATABASE_PROPERTIES = new Properties();
-         DATABASE_PROPERTIES.load(DATABASE_PROPERTIES_FILE);
-         for (Object o : DATABASE_PROPERTIES.keySet()) {
-            String key = o.toString().toLowerCase().trim();
-            String value = DATABASE_PROPERTIES.getProperty(key);
-            value = value == null ? "" : value.trim().toLowerCase();
-            System.out.println(value);
-         }
-      } catch (UnsupportedEncodingException e) {
-         e.printStackTrace();
-      } catch (IOException e) {
-         e.printStackTrace();
       }
+      return dataSourceConfig;
    }
    
    public DataSourceConfig() {
@@ -143,6 +88,32 @@ public class DataSourceConfig {
       return this;
    }
    
+   public void setEnvironment(String environment) {
+      environment = environment == null ? "" : environment;
+      switch (environment) {
+         case "development":
+         case "dev":
+            this.environment = Environment.DEVELOPMENT;
+         break;
+         case "test":
+            this.environment = Environment.TEST;
+         break;
+         case "stage":
+            this.environment = Environment.STAGE;
+         break;
+         case "production":
+            this.environment = Environment.PRODUCTION;
+         break;
+         default:
+            this.environment = Environment.DEVELOPMENT;
+      }
+   }
+   
+   public DataSourceConfig environment(String environment) {
+      setEnvironment(environment);
+      return this;
+   }
+   
    public Engine getEngine() {
       return engine;
    }
@@ -171,6 +142,29 @@ public class DataSourceConfig {
       return this;
    }
    
+   public void setEngine(String engine) {
+      engine = engine == null ? "mysql" : engine;
+      switch (engine) {
+         case "mysql":
+            this.engine = Engine.MYSQL;
+            url = Engine.MYSQL.getUrl();
+         break;
+         case "postgresql":
+            this.engine = Engine.POSTGRESQL;
+            url = Engine.POSTGRESQL.getUrl();
+         break;
+         case "oracle":
+            this.engine = Engine.ORACLE;
+            url = Engine.ORACLE.getUrl();
+         break;
+      }
+   }
+   
+   public DataSourceConfig engine(String engine) {
+      setEngine(engine);
+      return this;
+   }
+   
    public Pool getPool() {
       return pool;
    }
@@ -186,6 +180,20 @@ public class DataSourceConfig {
    public DataSourceConfig pool(Pool pool) {
       setPool(pool);
       return this;
+   }
+   
+   public void setPool(String pool) {
+      pool = pool == null ? "" : pool;
+      switch (pool) {
+         case "c3p0":
+            this.pool = Pool.C3P0;
+         break;
+         case "hikaricp":
+            this.pool = Pool.HIKARICP;
+         break;
+         default:
+            this.pool = Pool.NONE;
+      }
    }
    
    public String getHost() {
@@ -218,6 +226,16 @@ public class DataSourceConfig {
    }
    
    public DataSourceConfig port(Integer port) {
+      setPort(port);
+      return this;
+   }
+   
+   public void setPort(String port) {
+      port = port == null ? "3306" : port;
+      this.port = Integer.parseInt(port);
+   }
+   
+   public DataSourceConfig port(String port) {
       setPort(port);
       return this;
    }
@@ -368,6 +386,16 @@ public class DataSourceConfig {
       return this;
    }
    
+   public void setAutoReconnect(String autoReconnect) {
+      autoReconnect = autoReconnect == null ? "false" : autoReconnect;
+      this.autoReconnect = Boolean.parseBoolean(autoReconnect);
+   }
+   
+   public DataSourceConfig autoReconnect(String autoReconnect) {
+      setAutoReconnect(autoReconnect);
+      return this;
+   }
+   
    public Boolean getAutoReconnectForPools() {
       return autoReconnectForPools;
    }
@@ -385,6 +413,16 @@ public class DataSourceConfig {
       return this;
    }
    
+   public void setAutoReconnectForPools(String autoReconnectForPools) {
+      autoReconnectForPools = autoReconnectForPools == null ? "false" : autoReconnectForPools;
+      this.autoReconnectForPools = Boolean.parseBoolean(autoReconnectForPools);
+   }
+   
+   public DataSourceConfig autoReconnectForPools(String autoReconnectForPools) {
+      setAutoReconnectForPools(autoReconnectForPools);
+      return this;
+   }
+   
    public Boolean getAutoCommit() {
       return autoCommit;
    }
@@ -398,6 +436,16 @@ public class DataSourceConfig {
    }
    
    public DataSourceConfig autoCommit(Boolean autoCommit) {
+      setAutoCommit(autoCommit);
+      return this;
+   }
+   
+   public void setAutoCommit(String autoCommit) {
+      autoCommit = autoCommit == null ? "false" : autoCommit;
+      this.autoCommit = Boolean.parseBoolean(autoCommit);
+   }
+   
+   public DataSourceConfig autoCommit(String autoCommit) {
       setAutoCommit(autoCommit);
       return this;
    }
@@ -419,6 +467,16 @@ public class DataSourceConfig {
       return this;
    }
    
+   public void setAutoClose(String autoClose) {
+      autoClose = autoClose == null ? "false" : autoClose;
+      this.autoClose = Boolean.parseBoolean(autoClose);
+   }
+   
+   public DataSourceConfig autoClose(String autoClose) {
+      setAutoClose(autoClose);
+      return this;
+   }
+   
    public Boolean getUseSSL() {
       return useSSL;
    }
@@ -432,6 +490,16 @@ public class DataSourceConfig {
    }
    
    public DataSourceConfig useSSL(Boolean useSSL) {
+      setUseSSL(useSSL);
+      return this;
+   }
+   
+   public void setUseSSL(String useSSL) {
+      useSSL = useSSL == null ? "false" : useSSL;
+      this.useSSL = Boolean.parseBoolean(useSSL);
+   }
+   
+   public DataSourceConfig useSSL(String useSSL) {
       setUseSSL(useSSL);
       return this;
    }
@@ -453,6 +521,16 @@ public class DataSourceConfig {
       return this;
    }
    
+   public void setVerifyServerCertificate(String verifyServerCertificate) {
+      verifyServerCertificate = verifyServerCertificate == null ? "false" : verifyServerCertificate;
+      this.verifyServerCertificate = Boolean.parseBoolean(verifyServerCertificate);
+   }
+   
+   public DataSourceConfig verifyServerCertificate(String verifyServerCertificate) {
+      setVerifyServerCertificate(verifyServerCertificate);
+      return this;
+   }
+   
    public Boolean getLogging() {
       return logging;
    }
@@ -466,6 +544,16 @@ public class DataSourceConfig {
    }
    
    public DataSourceConfig logging(Boolean logging) {
+      setLogging(logging);
+      return this;
+   }
+   
+   public void setLogging(String logging) {
+      logging = logging == null ? "false" : logging;
+      this.logging = Boolean.parseBoolean(logging);
+   }
+   
+   public DataSourceConfig logging(String logging) {
       setLogging(logging);
       return this;
    }

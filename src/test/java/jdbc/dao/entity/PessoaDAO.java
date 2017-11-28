@@ -10,11 +10,10 @@ import jdbc.dao.DAO;
 public class PessoaDAO extends DAO<Pessoa> {
    
    private static final long serialVersionUID = 1L;
-
+   
    @Override
    public void insert(Pessoa object) {
       System.out.printf("INSERT INTO %s", object);
    }
-   
    
 }
