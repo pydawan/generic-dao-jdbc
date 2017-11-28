@@ -24,7 +24,7 @@ public class PessoaDAO extends DAO<Pessoa> {
          try {
             connection = connect();
             statement = connection.prepareStatement("INSERT INTO (%s) VALUES (%s)");
-            statement.executeUpdate();
+//            statement.executeUpdate();
          } catch (SQLException e) {
             e.printStackTrace();
          } finally {

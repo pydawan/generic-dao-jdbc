@@ -67,8 +67,17 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       return dataSource;
    }
    
+   public DataSource dataSource() {
+      return getDataSource();
+   }
+   
    public void setDataSource(DataSource dataSource) {
       this.dataSource = dataSource;
+   }
+   
+   public DAO<T> dataSource(DataSource dataSource) {
+      setDataSource(dataSource);
+      return this;
    }
    
    public Long getId() {
@@ -98,7 +107,7 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    }
    
    public Boolean getPersisted() {
-      return persisted;
+      return persisted == null ? false : persisted;
    }
    
    public Boolean persisted() {

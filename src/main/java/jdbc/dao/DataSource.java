@@ -19,68 +19,127 @@ public class DataSource {
    private String driver;
    private ConfigParser configParser;
    
+   public static DataSource get() {
+      return new DataSource();
+   }
+   
    public String getUrl() {
       return url;
+   }
+   
+   public String url() {
+      return getUrl();
    }
    
    public void setUrl(String url) {
       this.url = url;
    }
    
+   public DataSource url(String url) {
+      setUrl(url);
+      return this;
+   }
+   
    public String getUsername() {
       return username;
+   }
+   
+   public String username() {
+      return getUsername();
    }
    
    public void setUsername(String username) {
       this.username = username;
    }
    
+   public DataSource username(String username) {
+      setUsername(username);
+      return this;
+   }
+   
    public String getPassword() {
       return password;
+   }
+   
+   public String password() {
+      return getPassword();
    }
    
    public void setPassword(String password) {
       this.password = password;
    }
    
+   public DataSource password(String password) {
+      setPassword(password);
+      return this;
+   }
+   
    public String getDriver() {
       return driver;
+   }
+   
+   public String driver() {
+      return getDriver();
    }
    
    public void setDriver(String driver) {
       this.driver = driver;
    }
    
+   public DataSource driver(String driver) {
+      setDriver(driver);
+      return this;
+   }
+   
    public ConfigParser getConfigParser() {
       return configParser;
+   }
+   
+   public ConfigParser configParser() {
+      return getConfigParser();
    }
    
    public void setConfigParser(ConfigParser configParser) {
       this.configParser = configParser;
    }
    
-   public void load(String path, String environment) {
+   public DataSource configParser(ConfigParser configParser) {
+      setConfigParser(configParser);
+      return this;
+   }
+   
+   public void load(String path, String section) {
       path = path == null ? "" : path;
-      environment = environment == null ? "" : environment;
+      section = section == null ? "" : section;
       if (path.isEmpty() == false) {
          configParser = new ConfigParser();
          configParser.read(path);
-         if (environment.isEmpty() == true) {
+         if (section.isEmpty() == true) {
             url = configParser.get("url").toString();
             username = configParser.get("username").toString();
             password = configParser.get("password").toString();
             driver = configParser.get("driver").toString();
          } else {
-            url = configParser.get(environment, "url").toString();
-            username = configParser.get(environment, "username").toString();
-            password = configParser.get(environment, "password").toString();
-            driver = configParser.get(environment, "driver").toString();
+            url = configParser.get(section, "url").toString();
+            username = configParser.get(section, "username").toString();
+            password = configParser.get(section, "password").toString();
+            driver = configParser.get(section, "driver").toString();
          }
       }
    }
    
    public void load(String path) {
       load(path, null);
+   }
+   
+   public static DataSource get(String path, String section) {
+      DataSource dataSource = new DataSource();
+      dataSource.load(path, section);
+      return dataSource;
+   }
+   
+   public static DataSource get(String path) {
+      return get(path, null);
    }
    
    public Connection getConnection() {
@@ -95,6 +154,10 @@ public class DataSource {
          e.printStackTrace();
       }
       return connection;
+   }
+   
+   public Connection connection() {
+      return getConnection();
    }
    
    public Connection connect(String url, String username, String password, String driver) {
