@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Connection;
+import java.util.List;
 
 /**
  * Abstrai uma Entidade ou classe de objetos a ser persistida no banco de dados.
@@ -16,7 +17,7 @@ import java.sql.Connection;
 public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    private static final long serialVersionUID = 1L;
-   protected Connection connection;
+   protected DataSource dataSource;
    protected Class<?> entityClass;
    protected Long id;
    protected Boolean persisted;
@@ -62,12 +63,12 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       return 0;
    }
    
-   public Connection getConnection() {
-      return connection;
+   public DataSource getDataSource() {
+      return dataSource;
    }
    
-   public void setConnection(Connection connection) {
-      this.connection = connection;
+   public void setDataSource(DataSource dataSource) {
+      this.dataSource = dataSource;
    }
    
    public Long getId() {
@@ -114,6 +115,42 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       return this;
    }
    
+   protected Connection connect() {
+      Connection connection = null;
+      if (dataSource != null) {
+         connection = dataSource.getConnection();
+      }
+      return connection;
+   }
+   
+   protected void disconnect(Connection connection) {
+      if (dataSource != null) {
+         dataSource.disconnect(connection);
+      }
+   }
+   
+   protected void close(Object o) {
+      if (o != null && o instanceof AutoCloseable) {
+         try {
+            ((AutoCloseable) o).close();
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
+   }
+   
+   protected void close(Object... objects) {
+      if (objects != null) {
+         for (Object o : objects) {
+            close(o);
+         }
+      }
+   }
+   
    public abstract void insert(T object);
+   public abstract void update(T object);
+   public abstract void save(T object);
+   public abstract void delete(T object);
+   public abstract List<T> findAll();
    
 }
