@@ -13,6 +13,11 @@ import br.org.configparser.ConfigParser;
  */
 public class DataSource {
    
+   private static final String MESSAGE_URL_NOT_FOUND = "url not found!";
+   private static final String MESSAGE_USERNAME_NOT_FOUND = "username not found!";
+   private static final String MESSAGE_PASSWORD_NOT_FOUND = "password not found!";
+   private static final String MESSAGE_DRIVER_NOT_FOUND = "driver not found!";
+   
    private String url;
    private String username;
    private String password;
@@ -160,21 +165,35 @@ public class DataSource {
       return getConnection();
    }
    
-   public Connection connect(String url, String username, String password, String driver) {
-      Connection connection = null;
+   private void validateParams(String url, String username, String password, String driver) throws DataSourceException {
       url = url == null ? "" : url;
       username = username == null ? "" : username;
       password = password == null ? "" : password;
       driver = driver == null ? "" : driver;
-      if (url.isEmpty() == false && username.isEmpty() == false && password.isEmpty() == false && driver.isEmpty() == false) {
-         try {
-            Class.forName(driver);
-            connection = DriverManager.getConnection(url, username, password);
-         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-         } catch (SQLException e) {
-            e.printStackTrace();
-         }
+      if (url.isEmpty()) {
+         throw new DataSourceException(MESSAGE_URL_NOT_FOUND);
+      }
+      if (username.isEmpty()) {
+         throw new DataSourceException(MESSAGE_USERNAME_NOT_FOUND);
+      }
+      if (password.isEmpty()) {
+         throw new DataSourceException(MESSAGE_PASSWORD_NOT_FOUND);
+      }
+      if (driver.isEmpty()) {
+         throw new DataSourceException(MESSAGE_DRIVER_NOT_FOUND);
+      }
+   }
+   
+   public Connection connect(String url, String username, String password, String driver) throws DataSourceException {
+      Connection connection = null;
+      validateParams(url, username, password, driver);
+      try {
+         Class.forName(driver);
+         connection = DriverManager.getConnection(url, username, password);
+      } catch (ClassNotFoundException e) {
+         e.printStackTrace();
+      } catch (SQLException e) {
+         e.printStackTrace();
       }
       return connection;
    }

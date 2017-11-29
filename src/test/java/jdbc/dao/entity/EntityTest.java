@@ -22,7 +22,7 @@ public class EntityTest {
       DataSource ds = DataSource.get("main:datasource.properties");
       PessoaDAO pessoaDAO = new PessoaDAO(ds);
       pessoaDAO
-      .dataSource(ds)
+      .dataSource(null)
       .insert(
          Pessoa.create()
          .nome("Thiago Alexandre")
