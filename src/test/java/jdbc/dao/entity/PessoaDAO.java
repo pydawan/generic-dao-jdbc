@@ -1,9 +1,8 @@
 package jdbc.dao.entity;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.lang.reflect.Field;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.ArrayList;
 
 import jdbc.dao.DAO;
 
@@ -15,47 +14,40 @@ import jdbc.dao.DAO;
 public class PessoaDAO extends DAO<Pessoa> {
    
    private static final long serialVersionUID = 1L;
-
+   
    @Override
    public void insert(Pessoa object) {
       if (dataSource != null) {
-         Connection connection = null;
-         PreparedStatement statement = null;
+         columns = new ArrayList<>();
+         values = new ArrayList<>();
+         for (Field field : persistentFields) {
+            columns.add(field.getName());
+            try {
+               Object value = field.get(object);
+               if (value instanceof String) {
+                  values.add("'" + field.get(object) + "'");
+               } else {
+                  values.add(field.get(object));
+               }
+            } catch (IllegalArgumentException e) {
+               e.printStackTrace();
+            } catch (IllegalAccessException e) {
+               e.printStackTrace();
+            }
+         }
          try {
             connection = connect();
-            statement = connection.prepareStatement("INSERT INTO (%s) VALUES (%s)");
-//            statement.executeUpdate();
+            sql = String.format(SQL_INSERT_FORMAT, table, sql(columns), sql(values));
+            System.out.println(sql);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
          } catch (SQLException e) {
             e.printStackTrace();
          } finally {
-            close(statement);
+            close(preparedStatement);
             close(connection);
          }
       }
-   }
-
-   @Override
-   public void update(Pessoa object) {
-      // TODO Auto-generated method stub
-      
-   }
-
-   @Override
-   public void save(Pessoa object) {
-      // TODO Auto-generated method stub
-      
-   }
-
-   @Override
-   public void delete(Pessoa object) {
-      // TODO Auto-generated method stub
-      
-   }
-
-   @Override
-   public List<Pessoa> findAll() {
-      // TODO Auto-generated method stub
-      return null;
    }
    
 }

@@ -1,9 +1,12 @@
 package jdbc.dao;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,6 +24,15 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    protected Class<?> entityClass;
    protected Long id;
    protected Boolean persisted;
+   protected Connection connection;
+   protected PreparedStatement preparedStatement;
+   protected String table;
+   protected String sql;
+   protected StringBuilder sqlBuilder;
+   protected List<Field> persistentFields;
+   protected List<String> columns;
+   protected List<Object> values;
+   protected static final String SQL_INSERT_FORMAT = "INSERT INTO %s (%s) VALUES (%s)";
    
    public DAO() {
       Type genericSuperClass = getClass().getGenericSuperclass();
@@ -28,7 +40,9 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       Type typeArgument = parameterizedType.getActualTypeArguments()[0];
       entityClass = (Class<?>) typeArgument;
       id = 0l;
-      persisted = false; 
+      persisted = false;
+      loadPersistentFields();
+      table = entityClass.getSimpleName().toLowerCase();
    }
    
    @Override
@@ -156,10 +170,27 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       }
    }
    
+   protected static String sql(List<?> list) {
+      String sqlList = "";
+      if (list != null && list.isEmpty() == false) {
+         sqlList = list.toString();
+         sqlList = sqlList.replace("[", "");
+         sqlList = sqlList.replace("]", "");
+      }
+      return sqlList;
+   }
+   
+   private void loadPersistentFields() {
+      persistentFields = new ArrayList<>();
+      Field[] fields = entityClass.getDeclaredFields();
+      for (Field field : fields) {
+         field.setAccessible(true);
+         if (field.getAnnotation(Transient.class) == null) {
+            persistentFields.add(field);
+         }
+      }
+   }
+   
    public abstract void insert(T object);
-   public abstract void update(T object);
-   public abstract void save(T object);
-   public abstract void delete(T object);
-   public abstract List<T> findAll();
    
 }
