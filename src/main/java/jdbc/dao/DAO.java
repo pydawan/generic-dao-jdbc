@@ -20,6 +20,8 @@ import java.util.List;
 public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    private static final long serialVersionUID = 1L;
+   private static final String MENSAGEM_DATASOURCE_NAO_CONFIGURADO = "Esse DAO não possui um DataSource configurado para se " +
+   "conectar a um banco de dados!";
    protected DataSource dataSource;
    protected Class<?> entityClass;
    protected Long id;
@@ -42,8 +44,8 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       entityClass = (Class<?>) typeArgument;
       id = 0l;
       persisted = false;
-      loadPersistentFields();
       table = entityClass.getSimpleName().toLowerCase();
+      loadColumns();
    }
    
    public DAO() {
@@ -143,18 +145,30 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       return this;
    }
    
-   protected Connection connect() {
+   protected Connection getConnection() throws IllegalStateException {
       Connection connection = null;
       if (dataSource != null) {
          connection = dataSource.getConnection();
+      } else {
+         throw new IllegalStateException(MENSAGEM_DATASOURCE_NAO_CONFIGURADO);
       }
       return connection;
    }
    
-   protected void disconnect(Connection connection) {
+   protected void connect() throws IllegalStateException {
+      connection = getConnection();
+   }
+   
+   protected void disconnect(Connection connection) throws IllegalStateException {
       if (dataSource != null) {
          dataSource.disconnect(connection);
+      } else {
+         throw new IllegalStateException(MENSAGEM_DATASOURCE_NAO_CONFIGURADO);
       }
+   }
+   
+   protected void disconnect() throws IllegalStateException {
+      disconnect(connection);
    }
    
    protected void close(Object o) {
@@ -185,17 +199,39 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       return sqlList;
    }
    
-   private void loadPersistentFields() {
+   protected void loadColumns() {
+      columns = new ArrayList<>();
       persistentFields = new ArrayList<>();
       Field[] fields = entityClass.getDeclaredFields();
       for (Field field : fields) {
          field.setAccessible(true);
          if (field.getAnnotation(Transient.class) == null) {
+            columns.add(field.getName());
             persistentFields.add(field);
+            
          }
       }
    }
    
-   public abstract void insert(T object);
+   protected List<Object> getValues(T object) {
+      List<Object> values = new ArrayList<>();
+      for (Field field : persistentFields) {
+         try {
+            Object value = field.get(object);
+            if (value instanceof String) {
+               values.add("'" + field.get(object) + "'");
+            } else {
+               values.add(field.get(object));
+            }
+         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+         }
+      }
+      return values;
+   }
+   
+   public abstract void insert(T object) throws IllegalArgumentException;
    
 }
