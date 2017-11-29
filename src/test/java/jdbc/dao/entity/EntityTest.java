@@ -12,18 +12,22 @@ import jdbc.dao.DataSource;
 public class EntityTest {
    
    @Test
-   public void test() {
-      DataSource dataSource = new DataSource();
-      dataSource.load("main:datasource.properties");
-      PessoaDAO pessoaDAO = new PessoaDAO();
-      pessoaDAO.setDataSource(dataSource);
-      Pessoa pessoa = new Pessoa();
-      pessoa.setNome("Thiago Alexandre");
-      pessoa.setSobrenome("Martins Monteiro");
-      pessoaDAO.insert(pessoa);
+   public void testDataSource() {
       DataSource testDS = DataSource.get("main:datasource.properties", "test");
-      System.out.println(dataSource);
       System.out.println(testDS);
+   }
+   
+   @Test
+   public void testDAO() {
+      DataSource ds = DataSource.get("main:datasource.properties");
+      PessoaDAO pessoaDAO = new PessoaDAO(ds);
+      pessoaDAO
+      .dataSource(ds)
+      .insert(
+         Pessoa.create()
+         .nome("Thiago Alexandre")
+         .sobrenome("Martins Monteiro")
+      );
    }
    
 }

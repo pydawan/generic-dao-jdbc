@@ -34,7 +34,8 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    protected List<Object> values;
    protected static final String SQL_INSERT_FORMAT = "INSERT INTO %s (%s) VALUES (%s)";
    
-   public DAO() {
+   public DAO(DataSource dataSource) {
+      this.dataSource = dataSource;
       Type genericSuperClass = getClass().getGenericSuperclass();
       ParameterizedType parameterizedType = (ParameterizedType) genericSuperClass;
       Type typeArgument = parameterizedType.getActualTypeArguments()[0];
@@ -43,6 +44,10 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       persisted = false;
       loadPersistentFields();
       table = entityClass.getSimpleName().toLowerCase();
+   }
+   
+   public DAO() {
+      this(null);
    }
    
    @Override

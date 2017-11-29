@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import jdbc.dao.DAO;
+import jdbc.dao.DataSource;
 
 /**
  * @author thiago-amm
@@ -14,6 +15,14 @@ import jdbc.dao.DAO;
 public class PessoaDAO extends DAO<Pessoa> {
    
    private static final long serialVersionUID = 1L;
+   
+   public PessoaDAO() {
+      super();
+   }
+   
+   public PessoaDAO(DataSource ds) {
+      super(ds);
+   }
    
    @Override
    public void insert(Pessoa object) {
