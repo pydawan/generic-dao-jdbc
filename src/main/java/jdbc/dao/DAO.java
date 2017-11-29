@@ -20,8 +20,7 @@ import java.util.List;
 public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    private static final long serialVersionUID = 1L;
-   private static final String MENSAGEM_DATASOURCE_NAO_CONFIGURADO = "Esse DAO não possui um DataSource configurado para se " +
-   "conectar a um banco de dados!";
+   private static final String MESSAGE_DATASOURCE_NOT_FOUND = "DataSource not found!";
    protected DataSource dataSource;
    protected Class<?> entityClass;
    protected Long id;
@@ -150,7 +149,7 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       if (dataSource != null) {
          connection = dataSource.getConnection();
       } else {
-         throw new IllegalStateException(MENSAGEM_DATASOURCE_NAO_CONFIGURADO);
+         throw new IllegalStateException(MESSAGE_DATASOURCE_NOT_FOUND);
       }
       return connection;
    }
@@ -163,7 +162,7 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       if (dataSource != null) {
          dataSource.disconnect(connection);
       } else {
-         throw new IllegalStateException(MENSAGEM_DATASOURCE_NAO_CONFIGURADO);
+         throw new IllegalStateException(MESSAGE_DATASOURCE_NOT_FOUND);
       }
    }
    
