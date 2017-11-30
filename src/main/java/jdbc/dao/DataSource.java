@@ -165,7 +165,7 @@ public class DataSource {
       return getConnection();
    }
    
-   private void validateParams(String url, String username, String password, String driver) throws DataSourceException {
+   private static void validateParams(String url, String username, String password, String driver) throws DataSourceException {
       url = url == null ? "" : url;
       username = username == null ? "" : username;
       password = password == null ? "" : password;
@@ -184,7 +184,7 @@ public class DataSource {
       }
    }
    
-   public Connection connect(String url, String username, String password, String driver) throws DataSourceException {
+   public static Connection connect(String url, String username, String password, String driver) throws DataSourceException {
       Connection connection = null;
       validateParams(url, username, password, driver);
       try {
@@ -198,7 +198,7 @@ public class DataSource {
       return connection;
    }
    
-   public void disconnect(Connection connection) {
+   public static void disconnect(Connection connection) {
       if (connection != null) {
          try {
             connection.close();

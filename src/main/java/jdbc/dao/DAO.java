@@ -6,6 +6,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +21,13 @@ import java.util.List;
 public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    private static final long serialVersionUID = 1L;
-   private static final String MESSAGE_DATASOURCE_NOT_FOUND = "DataSource not found!";
+   private static final String MESSAGE_DATASOURCE_NOT_FOUND = "datasource not found!";
+   private static final String MESSAGE_STATEMENT_NOT_FOUND = "statement not found!";
    protected DataSource dataSource;
    protected Class<?> entityClass;
    protected Long id;
    protected Boolean persisted;
+   protected boolean connected;
    protected Connection connection;
    protected PreparedStatement preparedStatement;
    protected String table;
@@ -156,11 +159,12 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    protected void connect() throws IllegalStateException {
       connection = getConnection();
+      connected = true;
    }
    
    protected void disconnect(Connection connection) throws IllegalStateException {
       if (dataSource != null) {
-         dataSource.disconnect(connection);
+         DataSource.disconnect(connection);
       } else {
          throw new IllegalStateException(MESSAGE_DATASOURCE_NOT_FOUND);
       }
@@ -168,6 +172,15 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    protected void disconnect() throws IllegalStateException {
       disconnect(connection);
+      connected = false;
+   }
+   
+   protected boolean connected() {
+      return connected;
+   }
+   
+   protected boolean disconnected() {
+      return !connected();
    }
    
    protected void close(Object o) {
@@ -185,6 +198,23 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
          for (Object o : objects) {
             close(o);
          }
+      }
+   }
+   
+   protected void executeUpdate(String sql) throws IllegalArgumentException {
+      PreparedStatement preparedStatement = null;
+      sql = sql == null ? "" : sql;
+      if (connected() && sql.isEmpty() == false) {
+         try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.executeUpdate();
+         } catch (SQLException e) {
+            e.printStackTrace();
+         } finally {
+            close(preparedStatement);
+         }
+      } else {
+         throw new IllegalArgumentException(MESSAGE_STATEMENT_NOT_FOUND);
       }
    }
    
@@ -231,6 +261,17 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       return values;
    }
    
-   public abstract void insert(T object) throws IllegalArgumentException;
+   protected void loadValues(T object) {
+      values = getValues(object);
+   }
+   
+   public void insert(T object) throws IllegalArgumentException {
+      loadValues(object);
+      sql = String.format(SQL_INSERT_FORMAT, table, sql(columns), sql(values));
+      System.out.println(sql);
+      connect();
+      executeUpdate(sql);
+      disconnect();
+   }
    
 }

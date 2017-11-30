@@ -1,7 +1,5 @@
 package jdbc.dao.entity;
 
-import java.sql.SQLException;
-
 import jdbc.dao.DAO;
 import jdbc.dao.DataSource;
 
@@ -20,23 +18,6 @@ public class PessoaDAO extends DAO<Pessoa> {
    
    public PessoaDAO(DataSource ds) {
       super(ds);
-   }
-   
-   @Override
-   public void insert(Pessoa object) {
-      values = getValues(object);
-      try {
-         connect();
-         sql = String.format(SQL_INSERT_FORMAT, table, sql(columns), sql(values));
-         System.out.println(sql);
-         preparedStatement = connection.prepareStatement(sql);
-         preparedStatement.executeUpdate();
-      } catch (SQLException e) {
-         e.printStackTrace();
-      } finally {
-         close(preparedStatement);
-         close(connection);
-      }
    }
    
 }

@@ -21,13 +21,7 @@ public class EntityTest {
    public void testDAO() {
       DataSource ds = DataSource.get("main:datasource.properties");
       PessoaDAO pessoaDAO = new PessoaDAO(ds);
-      pessoaDAO
-      .dataSource(null)
-      .insert(
-         Pessoa.create()
-         .nome("Thiago Alexandre")
-         .sobrenome("Martins Monteiro")
-      );
+      pessoaDAO.dataSource(ds).insert(Pessoa.create().nome("Thiago Alexandre").sobrenome("Martins Monteiro"));
    }
    
 }
