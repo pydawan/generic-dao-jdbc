@@ -1,4 +1,4 @@
-package jdbc.dao.entity;
+package jdbc.dao;
 
 import java.util.Date;
 
