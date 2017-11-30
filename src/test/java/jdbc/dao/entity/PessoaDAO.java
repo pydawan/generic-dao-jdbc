@@ -16,8 +16,8 @@ public class PessoaDAO extends DAO<Pessoa> {
       super();
    }
    
-   public PessoaDAO(DataSource ds) {
-      super(ds);
+   public PessoaDAO(DataSource dataSource) {
+      super(dataSource);
    }
    
 }

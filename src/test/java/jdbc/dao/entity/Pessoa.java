@@ -2,6 +2,7 @@ package jdbc.dao.entity;
 
 import java.util.Date;
 
+import jdbc.dao.Table;
 import jdbc.dao.Transient;
 
 /**
@@ -9,10 +10,12 @@ import jdbc.dao.Transient;
  * @version v1.0.0 04/11/2017
  * @since v1.0.0
  */
+@Table(name = "pessoa")
 public class Pessoa {
    
    private String nome;
    private String sobrenome;
+   
    @Transient
    private Date dataNascimento;
    

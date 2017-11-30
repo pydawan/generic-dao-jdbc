@@ -30,9 +30,7 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    protected boolean connected;
    protected Connection connection;
    protected PreparedStatement preparedStatement;
-   protected String table;
-   protected String sql;
-   protected StringBuilder sqlBuilder;
+   protected String tableName;
    protected List<Field> persistentFields;
    protected List<String> columns;
    protected List<Object> values;
@@ -46,7 +44,12 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       entityClass = (Class<?>) typeArgument;
       id = 0l;
       persisted = false;
-      table = entityClass.getSimpleName().toLowerCase();
+      Table table = entityClass.getAnnotation(Table.class);
+      if (table != null) {
+         tableName = table.name();
+      } else {
+         tableName = entityClass.getSimpleName().toLowerCase();
+      }
       loadColumns();
    }
    
@@ -147,31 +150,17 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       return this;
    }
    
-   protected Connection getConnection() throws IllegalStateException {
-      Connection connection = null;
+   protected void connect() throws IllegalStateException {
       if (dataSource != null) {
          connection = dataSource.getConnection();
-      } else {
-         throw new IllegalStateException(MESSAGE_DATASOURCE_NOT_FOUND);
-      }
-      return connection;
-   }
-   
-   protected void connect() throws IllegalStateException {
-      connection = getConnection();
-      connected = true;
-   }
-   
-   protected void disconnect(Connection connection) throws IllegalStateException {
-      if (dataSource != null) {
-         DataSource.disconnect(connection);
+         connected = true;
       } else {
          throw new IllegalStateException(MESSAGE_DATASOURCE_NOT_FOUND);
       }
    }
    
    protected void disconnect() throws IllegalStateException {
-      disconnect(connection);
+      DataSource.disconnect(connection);
       connected = false;
    }
    
@@ -267,7 +256,7 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    public void insert(T object) throws IllegalArgumentException {
       loadValues(object);
-      sql = String.format(SQL_INSERT_FORMAT, table, sql(columns), sql(values));
+      String sql = String.format(SQL_INSERT_FORMAT, tableName, sql(columns), sql(values));
       System.out.println(sql);
       connect();
       executeUpdate(sql);
