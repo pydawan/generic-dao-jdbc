@@ -37,6 +37,7 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    protected List<String> columns;
    protected List<Object> values;
    protected static final String SQL_INSERT_FORMAT = "INSERT INTO %s (%s) VALUES (%s)";
+   protected static final String SQL_UPDATE_FORMAT = "UPDATE %s SET %s WHERE %s";
    
    public DAO(DataSource dataSource) {
       this.dataSource = dataSource;
@@ -50,7 +51,7 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       if (table != null) {
          tableName = table.name();
       } else {
-         tableName = entityClass.getSimpleName().toLowerCase();
+         tableName = SqlHelper.getTableName(entityClass);
       }
       loadColumns();
    }
@@ -226,7 +227,7 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       for (Field field : fields) {
          field.setAccessible(true);
          if (field.getAnnotation(Transient.class) == null) {
-            columns.add(field.getName());
+            columns.add(SqlHelper.getColumnName(field));
             persistentFields.add(field);
             
          }
@@ -270,36 +271,34 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    }
    
    public void insert(T object) throws IllegalArgumentException {
-      // TODO - usar referência local a objeto Connection ao invés de global.
-      // TODO - habilitar o uso de hikaricp
-      // TODO - habilitar o usuo de log jdbc
-      // TODO - criar método que retorna a lista de valores a serem persistidos.
-      loadValues(object);
-      // TODO - criar método que isola a criação da instrução SQL.
       String[] valuesArray = Strings.array("?", columns.size());
       String values = String.join(", ", valuesArray);
       String columns = sql(this.columns);
       String sql = String.format(SQL_INSERT_FORMAT, tableName, columns, values);
       System.out.println(sql);
-      // TODO - criar método connect que devolva uma conexão.
-      PreparedStatement preparedStatement = prepareStatement(sql, object);
-      Class<?> type = null;
       int position = 0;
       try {
+         Connection connection = dataSource.getConnection();
+         PreparedStatement preparedStatement = connection.prepareStatement(sql);
          for (Field persistentField : persistentFields) {
-            type = persistentField.getType();
-            position = persistentFields.indexOf(persistentField) + 1;
-            if (type.isAssignableFrom(String.class)) {
-               preparedStatement.setString(position, (String) persistentField.get(object));
-            }
+            preparedStatement.setObject(++position, persistentField.get(object));
          }
          preparedStatement.executeUpdate();
-         close(preparedStatement);
-      } catch (SQLException e) {
-         e.printStackTrace();
+         close(preparedStatement, connection);
       } catch (IllegalAccessException e) {
          e.printStackTrace();
+      } catch (SQLException e) {
+         e.printStackTrace();
       }
+   }
+   
+   public void update(T object) throws IllegalArgumentException {
+      String[] columnsAndValues = new String[columns.size()];
+      for (int i = 0; i < columns.size(); i++) {
+         columnsAndValues[i] = String.format("%s = ?", columns.get(i));
+      }
+      String sql = String.format(SQL_UPDATE_FORMAT, tableName, String.join(", ", columnsAndValues), "id = ?");
+      System.out.println(sql);
    }
    
 }

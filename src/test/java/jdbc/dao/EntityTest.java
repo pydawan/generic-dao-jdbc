@@ -1,5 +1,7 @@
 package jdbc.dao;
 
+import java.util.Date;
+
 import org.junit.Test;
 
 /**
@@ -19,7 +21,13 @@ public class EntityTest {
    public void testDAO() {
       DataSource ds = DataSource.get("main:datasource.properties");
       PessoaDAO pessoaDAO = new PessoaDAO(ds);
-      pessoaDAO.insert(Pessoa.create().nome("Thiago Alexandre").sobrenome("Martins Monteiro"));
+      pessoaDAO.insert(
+         Pessoa.create()
+         .nome("Thiago Alexandre")
+         .sobrenome("Martins Monteiro")
+         .dataNascimento(new Date())
+      );
+      pessoaDAO.update(Pessoa.create().nome("Lorenzo"));
    }
    
 }

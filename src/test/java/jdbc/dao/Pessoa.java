@@ -2,9 +2,6 @@ package jdbc.dao;
 
 import java.util.Date;
 
-import jdbc.dao.Table;
-import jdbc.dao.Transient;
-
 /**
  * @author thiago-amm
  * @version v1.0.0 04/11/2017
@@ -15,8 +12,6 @@ public class Pessoa {
    
    private String nome;
    private String sobrenome;
-   
-   @Transient
    private Date dataNascimento;
    
    public Pessoa() {
