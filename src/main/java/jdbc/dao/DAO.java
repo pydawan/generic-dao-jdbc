@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.org.jext.Strings;
+
 /**
  * Abstrai uma Entidade ou classe de objetos a ser persistida no banco de dados.
  * 
@@ -254,13 +256,50 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       values = getValues(object);
    }
    
+   protected PreparedStatement prepareStatement(String sql, T object) {
+      PreparedStatement preparedStatement = null;
+      connection = connection == null ? dataSource.getConnection() : connection;
+      if (connection != null) {
+         try {
+            preparedStatement = connection.prepareStatement(sql);
+         } catch (SQLException e) {
+            e.printStackTrace();
+         }
+      }
+      return preparedStatement;
+   }
+   
    public void insert(T object) throws IllegalArgumentException {
+      // TODO - usar referência local a objeto Connection ao invés de global.
+      // TODO - habilitar o uso de hikaricp
+      // TODO - habilitar o usuo de log jdbc
+      // TODO - criar método que retorna a lista de valores a serem persistidos.
       loadValues(object);
-      String sql = String.format(SQL_INSERT_FORMAT, tableName, sql(columns), sql(values));
+      // TODO - criar método que isola a criação da instrução SQL.
+      String[] valuesArray = Strings.array("?", columns.size());
+      String values = String.join(", ", valuesArray);
+      String columns = sql(this.columns);
+      String sql = String.format(SQL_INSERT_FORMAT, tableName, columns, values);
       System.out.println(sql);
-      connect();
-      executeUpdate(sql);
-      disconnect();
+      // TODO - criar método connect que devolva uma conexão.
+      PreparedStatement preparedStatement = prepareStatement(sql, object);
+      Class<?> type = null;
+      int position = 0;
+      try {
+         for (Field persistentField : persistentFields) {
+            type = persistentField.getType();
+            position = persistentFields.indexOf(persistentField) + 1;
+            if (type.isAssignableFrom(String.class)) {
+               preparedStatement.setString(position, (String) persistentField.get(object));
+            }
+         }
+         preparedStatement.executeUpdate();
+         close(preparedStatement);
+      } catch (SQLException e) {
+         e.printStackTrace();
+      } catch (IllegalAccessException e) {
+         e.printStackTrace();
+      }
    }
    
 }

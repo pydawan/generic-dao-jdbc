@@ -2,8 +2,6 @@ package jdbc.dao;
 
 import org.junit.Test;
 
-import jdbc.dao.DataSource;
-
 /**
  * @author thiago-amm
  * @version v1.0.0 04/11/2017
