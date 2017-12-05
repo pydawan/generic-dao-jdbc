@@ -3,6 +3,8 @@ package jdbc.dao;
 import java.io.Serializable;
 
 /**
+ * Representa uma entidade ou objeto capaz de ser mapeado em um registro de uma tabela.
+ * 
  * @author thiago-amm
  * @version v1.0.0 04/12/2017
  * @since v1.0.0

@@ -1,6 +1,5 @@
 package jdbc.dao;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -20,15 +19,12 @@ import br.org.jext.Strings;
  * @since v1.0.0
  * @param <T>
  */
-public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
+public abstract class DAO<T> {
    
-   private static final long serialVersionUID = 1L;
    private static final String MESSAGE_DATASOURCE_NOT_FOUND = "datasource not found!";
    private static final String MESSAGE_STATEMENT_NOT_FOUND = "statement not found!";
    protected DataSource dataSource;
    protected Class<?> entityClass;
-   protected Long id;
-   protected Boolean persisted;
    protected boolean connected;
    protected Connection connection;
    protected PreparedStatement preparedStatement;
@@ -45,8 +41,6 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
       ParameterizedType parameterizedType = (ParameterizedType) genericSuperClass;
       Type typeArgument = parameterizedType.getActualTypeArguments()[0];
       entityClass = (Class<?>) typeArgument;
-      id = 0l;
-      persisted = false;
       Table table = entityClass.getAnnotation(Table.class);
       if (table != null) {
          tableName = table.name();
@@ -58,38 +52,6 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    public DAO() {
       this(null);
-   }
-   
-   @Override
-   public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + ((id == null) ? 0 : id.hashCode());
-      return result;
-   }
-   
-   @SuppressWarnings("unchecked")
-   @Override
-   public boolean equals(Object obj) {
-      if (obj == null) return false;
-      if (this == obj) return true;
-      if (this.getClass() != obj.getClass()) return false;
-      DAO<T> other = (DAO<T>) obj;
-      if (this.persisted && !other.persisted()) return false;
-      if (!this.persisted() && other.persisted) return false;
-      if (this.id != other.id) return false;
-      return true;
-   }
-   
-   @Override
-   public int compareTo(DAO<T> other) {
-      if (this.id < other.id) {
-         return -1;
-      }
-      if (this.id > other.id) {
-         return 1;
-      }
-      return 0;
    }
    
    public DataSource getDataSource() {
@@ -106,50 +68,6 @@ public abstract class DAO<T> implements Comparable<DAO<T>>, Serializable {
    
    public DAO<T> dataSource(DataSource dataSource) {
       setDataSource(dataSource);
-      return this;
-   }
-   
-   public Long getId() {
-      return id;
-   }
-   
-   public Long id() {
-      return getId();
-   }
-   
-   public void setId(Long id) {
-      this.id = id == null ? 0l : id;
-   }
-   
-   public DAO<T> id(Long id) {
-      setId(id);
-      return this;
-   }
-   
-   public void setId(Integer id) {
-      this.id = id == null ? 0l : (long) id;
-   }
-   
-   public DAO<T> id(Integer id) {
-      setId(id);
-      return this;
-   }
-   
-   public Boolean getPersisted() {
-      return persisted == null ? false : persisted;
-   }
-   
-   public Boolean persisted() {
-      return getPersisted();
-   }
-   
-   public void setPersisted(Boolean persisted) {
-      persisted = persisted == null ? false : true;
-      this.persisted = persisted;
-   }
-   
-   public DAO<T> persisted(Boolean persisted) {
-      setPersisted(persisted);
       return this;
    }
    
