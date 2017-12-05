@@ -1,6 +1,7 @@
 package jdbc.dao;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 
 /**
  * Representa uma entidade ou objeto capaz de ser mapeado em um registro de uma tabela.
@@ -93,6 +94,27 @@ public abstract class Entity implements Comparable<Entity>, Serializable {
    public Entity persisted(Boolean persisted) {
       setPersisted(persisted);
       return this;
+   }
+   
+   @Override
+   public String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append(String.format("%s(", this.getClass().getSimpleName()));
+      for (Field field : this.getClass().getDeclaredFields()) {
+         field.setAccessible(true);
+         try {
+            if (field.getName().equals("serialVersionUID") == false) {
+               sb.append(String.format("%s=%s, ", field.getName(), field.get(this)));
+            }
+         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+         }
+      }
+      sb.replace(sb.lastIndexOf(", "), sb.length(), "");
+      sb.append(")");
+      return sb.toString();
    }
    
 }
