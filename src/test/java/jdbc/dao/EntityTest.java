@@ -21,13 +21,17 @@ public class EntityTest {
    public void testDAO() {
       DataSource ds = DataSource.get("main:datasource.properties");
       PessoaDAO pessoaDAO = new PessoaDAO(ds);
-      pessoaDAO.insert(
-         Pessoa.create()
-         .nome("Thiago Alexandre")
-         .sobrenome("Martins Monteiro")
-         .dataNascimento(new Date())
-      );
-      pessoaDAO.update(Pessoa.create().nome("Lorenzo"));
+      
+      Pessoa pessoa = Pessoa.create().nome("Thiago Alexandre").sobrenome("Martins Monteiro").dataNascimento(new Date());
+      System.out.println(pessoa);
+      
+      pessoaDAO.insert(pessoa);
+      System.out.println(pessoa);
+      
+      pessoaDAO.update(pessoa.nome("Lorenzo").sobrenome("Roncolato Louly Monteiro"));
+      pessoaDAO.delete(pessoa);
+      
+      pessoaDAO.findAll().forEach(System.out::println);
    }
    
 }

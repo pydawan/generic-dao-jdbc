@@ -19,6 +19,10 @@ public class Pessoa extends Entity {
       return new Pessoa();
    }
    
+   public static Pessoa of() {
+      return new Pessoa();
+   }
+   
    public String getNome() {
       return nome;
    }

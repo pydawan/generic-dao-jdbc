@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 
 /**
- * Representa uma entidade ou objeto capaz de ser mapeado em um registro de uma tabela.
+ * Representa uma entidade ou objeto capaz de ser mapeado em um registro de uma
+ * tabela.
  * 
  * @author thiago-amm
  * @version v1.0.0 04/12/2017
@@ -15,10 +16,17 @@ public abstract class Entity implements Comparable<Entity>, Serializable {
    private static final long serialVersionUID = 1L;
    protected Long id;
    protected Boolean persisted;
+   protected String tableName;
    
    public Entity() {
-      id = 0l;
+      id = null;
       persisted = false;
+      Table tableAnnotation = this.getClass().getAnnotation(Table.class);
+      if (tableName != null) {
+         tableName = tableAnnotation.name();
+      } else {
+         tableName = SqlHelper.getTableName(this.getClass());
+      }
    }
    
    @Override
@@ -96,24 +104,39 @@ public abstract class Entity implements Comparable<Entity>, Serializable {
       return this;
    }
    
+   public String getTableName() {
+      return tableName;
+   }
+   
+   public String tableName() {
+      return getTableName();
+   }
+   
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder();
       sb.append(String.format("%s(", this.getClass().getSimpleName()));
-      for (Field field : this.getClass().getDeclaredFields()) {
-         field.setAccessible(true);
-         try {
+      try {
+         Field idField = this.getClass().getSuperclass().getDeclaredField("id");
+         idField.setAccessible(true);
+         sb.append(String.format("id=%s, ", idField.get(this)));
+         for (Field field : this.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
             if (field.getName().equals("serialVersionUID") == false) {
                sb.append(String.format("%s=%s, ", field.getName(), field.get(this)));
             }
-         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-         } catch (IllegalAccessException e) {
-            e.printStackTrace();
          }
+         sb.replace(sb.lastIndexOf(", "), sb.length(), "");
+         sb.append(")");
+      } catch (NoSuchFieldException e) {
+         e.printStackTrace();
+      } catch (SecurityException e) {
+         e.printStackTrace();
+      } catch (IllegalArgumentException e) {
+         e.printStackTrace();
+      } catch (IllegalAccessException e) {
+         e.printStackTrace();
       }
-      sb.replace(sb.lastIndexOf(", "), sb.length(), "");
-      sb.append(")");
       return sb.toString();
    }
    
