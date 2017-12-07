@@ -34,6 +34,7 @@ public abstract class DAO<T extends Entity> {
    protected static final List<? extends Entity> EMPTY_LIST = new ArrayList<>(0);
    protected static final String FORMAT_FIND_ALL = "SELECT * FROM %s"; 
    protected static final String FORMAT_FIND_BY_ID = "SELECT * FROM %s WHERE id = ?";
+   protected static final String FORMAT_FIND_BY = "SELECT * FROM %s WHERE %s = ?";
    protected static final String FORMAT_FIND_LAST_ID = "SELECT id FROM %s ORDER BY id DESC LIMIT 1";
    protected static final String FORMAT_INSERT = "INSERT INTO %s (%s) VALUES (%s)";
    protected static final String FORMAT_UPDATE = "UPDATE %s SET %s WHERE %s";
@@ -262,6 +263,50 @@ public abstract class DAO<T extends Entity> {
          }
       }
       return (T) object;
+   }
+   
+   @SuppressWarnings("unchecked")
+   public List<T> findBy(String field, Object value) {
+      List<T> list = (List<T>) EMPTY_LIST;
+      field = field == null ? "" : field;
+      if (field.isEmpty() == false) {
+         list = new ArrayList<>();
+         Connection connection = null;
+         PreparedStatement preparedStatement = null;
+         ResultSet resultSet = null;
+         try {
+            connection = dataSource.getConnection();
+            String sql = String.format(FORMAT_FIND_BY, tableName, field);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setObject(1, value);
+            resultSet = preparedStatement.executeQuery();
+            String columnLabel = "";
+            while (resultSet.next()) {
+               Object object = entityClass.newInstance();
+               Field idField = entityClass.getSuperclass().getDeclaredField("id");
+               idField.setAccessible(true);
+               idField.set(object, resultSet.getObject("id"));
+               for (Field persistentField : persistentFields) {
+                  columnLabel = SqlHelper.getColumnName(persistentField);
+                  persistentField.set(object, resultSet.getObject(columnLabel));
+               }
+               list.add((T) object);
+            }
+         } catch (SQLException e) {
+            e.printStackTrace();
+         } catch (InstantiationException e) {
+            e.printStackTrace();
+         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+         } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+         } catch (SecurityException e) {
+            e.printStackTrace();
+         } finally {
+            close(resultSet, preparedStatement, connection);
+         }
+      }
+      return list;
    }
    
    public void insert(T entity) throws IllegalArgumentException {

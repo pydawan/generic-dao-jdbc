@@ -1,6 +1,7 @@
 package jdbc.dao;
 
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -32,8 +33,12 @@ public class EntityTest {
       pessoaDAO.delete(pessoa);
       
       pessoaDAO.findAll().forEach(System.out::println);
-      
       pessoaDAO.findById(pessoaDAO.findLastId());
+      pessoaDAO.findBy("nome", "Thiago Alexandre Martins Monteiro");
+      
+      System.out.println("-----------------------------------------");
+      List<Pessoa> pessoas = pessoaDAO.findBy("nome", "Thiago Alexandre");
+      System.out.println(pessoas.size());
    }
    
 }
