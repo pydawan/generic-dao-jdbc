@@ -203,6 +203,9 @@ public abstract class DAO<T extends Entity> {
             Field idField = entityClass.getSuperclass().getDeclaredField("id");
             idField.setAccessible(true);
             idField.set(object, resultSet.getObject("id"));
+            Field persistedField = entityClass.getSuperclass().getDeclaredField("persisted");
+            persistedField.setAccessible(true);
+            persistedField.set(object, true);
             // percorre cada atributo do objeto.
             for (Field persistentField : persistentFields) {
                columnLabel = SqlHelper.getColumnName(persistentField);
@@ -243,6 +246,9 @@ public abstract class DAO<T extends Entity> {
                Field idField = entityClass.getSuperclass().getDeclaredField("id");
                idField.setAccessible(true);
                idField.set(object, resultSet.getObject("id"));
+               Field persistedField = entityClass.getSuperclass().getDeclaredField("persisted");
+               persistedField.setAccessible(true);
+               persistedField.set(object, true);
                for (Field persistentField : persistentFields) {
                   columnLabel = SqlHelper.getColumnName(persistentField);
                   persistentField.set(object, resultSet.getObject(columnLabel));
@@ -286,6 +292,9 @@ public abstract class DAO<T extends Entity> {
                Field idField = entityClass.getSuperclass().getDeclaredField("id");
                idField.setAccessible(true);
                idField.set(object, resultSet.getObject("id"));
+               Field persistedField = entityClass.getSuperclass().getDeclaredField("persisted");
+               persistedField.setAccessible(true);
+               persistedField.set(object, true);
                for (Field persistentField : persistentFields) {
                   columnLabel = SqlHelper.getColumnName(persistentField);
                   persistentField.set(object, resultSet.getObject(columnLabel));
@@ -325,6 +334,7 @@ public abstract class DAO<T extends Entity> {
          }
          preparedStatement.executeUpdate();
          entity.setId(findLastId());
+         entity.setPersisted(true);
       } catch (IllegalAccessException e) {
          e.printStackTrace();
       } catch (SQLException e) {
@@ -352,12 +362,25 @@ public abstract class DAO<T extends Entity> {
          preparedStatement.setObject(++position, entity.getId());
          preparedStatement.executeUpdate();
          entity.setId(findLastId());
+         entity.setPersisted(true);
       } catch (IllegalAccessException e) {
          e.printStackTrace();
       } catch (SQLException e) {
          e.printStackTrace();
       } finally {
          close(preparedStatement, connection);
+      }
+   }
+   
+   public void save(T entity) throws IllegalArgumentException {
+      if (entity != null) {
+         if (entity.getPersisted() == false) {
+            this.insert(entity);
+         } else {
+            this.update(entity);
+         }
+      } else {
+         throw new IllegalArgumentException("ATENÇÃO: A entidade a ser persistida no banco de dados não pode ser nula!");
       }
    }
    
@@ -370,6 +393,7 @@ public abstract class DAO<T extends Entity> {
          preparedStatement = connection.prepareStatement(sql);
          preparedStatement.setObject(1, entity.getId());
          preparedStatement.executeUpdate();
+         entity.setPersisted(false);
       } catch (SQLException e) {
          e.printStackTrace();
       } finally {

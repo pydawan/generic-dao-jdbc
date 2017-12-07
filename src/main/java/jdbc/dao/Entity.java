@@ -126,6 +126,9 @@ public abstract class Entity implements Comparable<Entity>, Serializable {
                sb.append(String.format("%s=%s, ", field.getName(), field.get(this)));
             }
          }
+         Field persistedField = this.getClass().getSuperclass().getDeclaredField("persisted");
+         persistedField.setAccessible(true);
+         sb.append(String.format("persisted=%s, ", persistedField.get(this)));
          sb.replace(sb.lastIndexOf(", "), sb.length(), "");
          sb.append(")");
       } catch (NoSuchFieldException e) {
