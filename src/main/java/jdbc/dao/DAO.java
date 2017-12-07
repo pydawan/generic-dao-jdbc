@@ -21,7 +21,7 @@ import br.org.jext.Strings;
  * @param <T>
  */
 public abstract class DAO<T extends Entity> {
-   
+
    private static final String MESSAGE_DATASOURCE_NOT_FOUND = "datasource not found!";
    protected DataSource dataSource;
    protected Class<?> entityClass;
@@ -31,11 +31,13 @@ public abstract class DAO<T extends Entity> {
    protected List<String> columns;
    protected List<Object> values;
    protected String tableName;
-   protected static final String SQL_SELECT_ALL_FORMAT = "SELECT * FROM %s";
-   protected static final String SQL_SELECT_LAST_ID_FORMAT = "SELECT id FROM %s ORDER BY id DESC LIMIT 1";
-   protected static final String SQL_INSERT_FORMAT = "INSERT INTO %s (%s) VALUES (%s)";
-   protected static final String SQL_UPDATE_FORMAT = "UPDATE %s SET %s WHERE %s";
-   protected static final String SQL_DELETE_FORMAT = "DELETE FROM %s WHERE %s";
+   protected static final List<? extends Entity> EMPTY_LIST = new ArrayList<>(0);
+   protected static final String FORMAT_FIND_ALL = "SELECT * FROM %s"; 
+   protected static final String FORMAT_FIND_BY_ID = "SELECT * FROM %s WHERE id = ?";
+   protected static final String FORMAT_FIND_LAST_ID = "SELECT id FROM %s ORDER BY id DESC LIMIT 1";
+   protected static final String FORMAT_INSERT = "INSERT INTO %s (%s) VALUES (%s)";
+   protected static final String FORMAT_UPDATE = "UPDATE %s SET %s WHERE %s";
+   protected static final String FORMAT_DELETE = "DELETE FROM %s WHERE %s";
    
    public DAO(DataSource dataSource) {
       this.dataSource = dataSource;
@@ -166,7 +168,7 @@ public abstract class DAO<T extends Entity> {
       PreparedStatement preparedStatement = null;
       ResultSet resultSet = null;
       try {
-         String sql = String.format(SQL_SELECT_LAST_ID_FORMAT, tableName);
+         String sql = String.format(FORMAT_FIND_LAST_ID, tableName);
          connection = dataSource.getConnection();
          preparedStatement = connection.prepareStatement(sql);
          resultSet = preparedStatement.executeQuery();
@@ -188,7 +190,7 @@ public abstract class DAO<T extends Entity> {
       PreparedStatement preparedStatement = null;
       ResultSet resultSet = null;
       try {
-         String sql = String.format(SQL_SELECT_ALL_FORMAT, tableName);
+         String sql = String.format(FORMAT_FIND_ALL, tableName);
          connection = dataSource.getConnection();
          preparedStatement = connection.prepareStatement(sql);
          resultSet = preparedStatement.executeQuery();
@@ -197,10 +199,12 @@ public abstract class DAO<T extends Entity> {
          // percorre os registros retornados do banco de dados.
          while (resultSet.next()) {
             object = entityClass.newInstance();
+            Field idField = entityClass.getSuperclass().getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(object, resultSet.getObject("id"));
             // percorre cada atributo do objeto.
             for (Field persistentField : persistentFields) {
                columnLabel = SqlHelper.getColumnName(persistentField);
-               persistentField.setAccessible(true);
                persistentField.set(object, resultSet.getObject(columnLabel));
             }
             list.add((T) object);
@@ -211,8 +215,53 @@ public abstract class DAO<T extends Entity> {
          e.printStackTrace();
       } catch (IllegalAccessException e) {
          e.printStackTrace();
+      } catch (NoSuchFieldException e) {
+         e.printStackTrace();
+      } catch (SecurityException e) {
+         e.printStackTrace();
       }
       return list;
+   }
+   
+   @SuppressWarnings("unchecked")
+   public T findById(Long id) {
+      Object object = null;
+      if (id != null) {
+         Connection connection = null;
+         PreparedStatement preparedStatement = null;
+         ResultSet resultSet = null;
+         try {
+            connection = dataSource.getConnection();
+            String sql = String.format(FORMAT_FIND_BY_ID, tableName, id);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, id);
+            resultSet = preparedStatement.executeQuery();
+            String columnLabel = "";
+            while (resultSet.next()) {
+               object = entityClass.newInstance();
+               Field idField = entityClass.getSuperclass().getDeclaredField("id");
+               idField.setAccessible(true);
+               idField.set(object, resultSet.getObject("id"));
+               for (Field persistentField : persistentFields) {
+                  columnLabel = SqlHelper.getColumnName(persistentField);
+                  persistentField.set(object, resultSet.getObject(columnLabel));
+               }
+            }
+         } catch (SQLException e) {
+            e.printStackTrace();
+         } catch (InstantiationException e) {
+            e.printStackTrace();
+         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+         } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+         } catch (SecurityException e) {
+            e.printStackTrace();
+         } finally {
+            close(resultSet, preparedStatement, connection);
+         }
+      }
+      return (T) object;
    }
    
    public void insert(T entity) throws IllegalArgumentException {
@@ -221,7 +270,7 @@ public abstract class DAO<T extends Entity> {
       String[] valuesArray = Strings.array("?", columns.size());
       String values = String.join(", ", valuesArray);
       String columns = sql(this.columns);
-      String sql = String.format(SQL_INSERT_FORMAT, tableName, columns, values);
+      String sql = String.format(FORMAT_INSERT, tableName, columns, values);
       int position = 0;
       try {
          connection = dataSource.getConnection();
@@ -247,7 +296,7 @@ public abstract class DAO<T extends Entity> {
       for (int i = 0; i < columns.size(); i++) {
          columnsAndValues[i] = String.format("%s = ?", columns.get(i));
       }
-      String sql = String.format(SQL_UPDATE_FORMAT, tableName, String.join(", ", columnsAndValues), "id = ?");
+      String sql = String.format(FORMAT_UPDATE, tableName, String.join(", ", columnsAndValues), "id = ?");
       int position = 0;
       try {
          connection = dataSource.getConnection();
@@ -270,7 +319,7 @@ public abstract class DAO<T extends Entity> {
    public void delete(T entity) throws IllegalArgumentException {
       Connection connection = null;
       PreparedStatement preparedStatement = null;
-      String sql = String.format(SQL_DELETE_FORMAT, tableName, "id = ?");
+      String sql = String.format(FORMAT_DELETE, tableName, "id = ?");
       try {
          connection = dataSource.getConnection();
          preparedStatement = connection.prepareStatement(sql);

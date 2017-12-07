@@ -32,6 +32,8 @@ public class EntityTest {
       pessoaDAO.delete(pessoa);
       
       pessoaDAO.findAll().forEach(System.out::println);
+      
+      pessoaDAO.findById(pessoaDAO.findLastId());
    }
    
 }
