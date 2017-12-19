@@ -165,26 +165,26 @@ public class DataSource {
       return getConnection();
    }
    
-   private static void validateParams(String url, String username, String password, String driver) throws DataSourceException {
+   private static void validateParams(String url, String username, String password, String driver) throws DAOException {
       url = url == null ? "" : url;
       username = username == null ? "" : username;
       password = password == null ? "" : password;
       driver = driver == null ? "" : driver;
       if (url.isEmpty()) {
-         throw new DataSourceException(MESSAGE_URL_NOT_FOUND);
+         throw new DAOException(MESSAGE_URL_NOT_FOUND);
       }
       if (username.isEmpty()) {
-         throw new DataSourceException(MESSAGE_USERNAME_NOT_FOUND);
+         throw new DAOException(MESSAGE_USERNAME_NOT_FOUND);
       }
       if (password.isEmpty()) {
-         throw new DataSourceException(MESSAGE_PASSWORD_NOT_FOUND);
+         throw new DAOException(MESSAGE_PASSWORD_NOT_FOUND);
       }
       if (driver.isEmpty()) {
-         throw new DataSourceException(MESSAGE_DRIVER_NOT_FOUND);
+         throw new DAOException(MESSAGE_DRIVER_NOT_FOUND);
       }
    }
    
-   public static Connection connect(String url, String username, String password, String driver) throws DataSourceException {
+   public static Connection connect(String url, String username, String password, String driver) throws DAOException {
       Connection connection = null;
       validateParams(url, username, password, driver);
       try {

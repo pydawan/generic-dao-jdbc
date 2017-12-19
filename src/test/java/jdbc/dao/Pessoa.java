@@ -8,7 +8,7 @@ import java.util.Date;
  * @since v1.0.0
  */
 @Table(name = "pessoa")
-public class Pessoa extends Entity {
+public class Pessoa extends Entity implements Factory<Pessoa> {
    
    private static final long serialVersionUID = 1L;
    private String nome;

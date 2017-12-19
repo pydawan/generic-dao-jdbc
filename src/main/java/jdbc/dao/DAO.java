@@ -332,6 +332,7 @@ public abstract class DAO<T extends Entity> {
          for (Field persistentField : persistentFields) {
             preparedStatement.setObject(++position, persistentField.get(entity));
          }
+         
          preparedStatement.executeUpdate();
          entity.setId(findLastId());
          entity.setPersisted(true);

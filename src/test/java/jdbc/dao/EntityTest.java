@@ -39,6 +39,10 @@ public class EntityTest {
       System.out.println("-----------------------------------------");
       List<Pessoa> pessoas = pessoaDAO.findBy("nome", "Thiago Alexandre");
       System.out.println(pessoas.size());
+      
+      System.out.println(pessoa.newInstance());
+      System.out.println(Factory.newInstance(Pessoa.class));
+      
    }
    
 }
