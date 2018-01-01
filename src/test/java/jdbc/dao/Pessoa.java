@@ -8,16 +8,12 @@ import java.util.Date;
  * @since v1.0.0
  */
 @Table(name = "pessoa")
-public class Pessoa extends Entity implements Factory<Pessoa> {
+public class Pessoa extends Entity {
    
    private static final long serialVersionUID = 1L;
    private String nome;
    private String sobrenome;
    private Date dataNascimento;
-   
-   public static Pessoa create() {
-      return new Pessoa();
-   }
    
    public static Pessoa of() {
       return new Pessoa();

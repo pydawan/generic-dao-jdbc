@@ -23,7 +23,7 @@ public class EntityTest {
       DataSource ds = DataSource.get("main:datasource.properties");
       PessoaDAO pessoaDAO = new PessoaDAO(ds);
       
-      Pessoa pessoa = Pessoa.create().nome("Thiago Alexandre").sobrenome("Martins Monteiro").dataNascimento(new Date());
+      Pessoa pessoa = Pessoa.of().nome("Thiago Alexandre").sobrenome("Martins Monteiro").dataNascimento(new Date());
       System.out.println(pessoa);
       
       pessoaDAO.insert(pessoa);
@@ -39,9 +39,6 @@ public class EntityTest {
       System.out.println("-----------------------------------------");
       List<Pessoa> pessoas = pessoaDAO.findBy("nome", "Thiago Alexandre");
       System.out.println(pessoas.size());
-      
-      System.out.println(pessoa.newInstance());
-      System.out.println(Factory.newInstance(Pessoa.class));
       
    }
    
