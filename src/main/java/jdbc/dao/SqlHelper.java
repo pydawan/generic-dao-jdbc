@@ -10,29 +10,29 @@ import java.lang.reflect.Field;
 public class SqlHelper {
 
 	public static final String getTableName(String className) {
-		className = className == null ? "" : className.trim();
+		if (className == null || className.isBlank()) {
+			return "";
+		}
+		
 		String tableName = "";
-		if (!className.isEmpty()) {
-			if (className.matches("([A-Z](\\w+))+")) {
-				String[] words = className.split("(?=[A-Z])");
-				if (words != null) {
-					if (words.length >= 2) {
-						className = "";
-						for (String word : words) {
-							if (!word.isEmpty()) {
-								className += word;
-							}
-						}
-					} else {
-
+		StringBuilder sb = new StringBuilder();
+		
+		if (className.matches("([A-Z](\\w+))+")) {
+			String[] words = className.split("(?=[A-Z])");
+			
+			if (words.length >= 2) {
+				for (String word : words) {
+					if (!word.isEmpty()) {
+						sb.append(word);
 					}
 				}
 			}
-			className = className.trim();
-			className = className.replaceAll("([a-z0-9]+)([A-Z])", "$1_$2");
-			className = className.toLowerCase();
-			tableName = className;
 		}
+		
+		className = sb.toString().trim();
+		className = className.replaceAll("([a-z0-9]+)([A-Z])", "$1_$2").toLowerCase();
+		tableName = className;
+		
 		return tableName;
 	}
 
@@ -97,25 +97,28 @@ public class SqlHelper {
 	}
 
 	public static final String getFieldName(String columnName) {
-		String fieldName = "";
-		if (columnName != null && !columnName.trim().isEmpty()) {
-			fieldName = columnName.trim();
-			fieldName = columnName.replace("_id", "");
-			if (fieldName.matches("(\\w+_\\w+)+")) {
-				String[] words = fieldName.split("_");
-				if (words != null) {
-					if (words.length >= 2) {
-						fieldName = "";
-						for (String word : words) {
-							if (!word.isEmpty()) {
-								fieldName += String.format("%s%s", word.substring(0, 1).toUpperCase(),
-										word.substring(1, word.length()));
-							}
-						}
+		if (columnName == null || columnName.isBlank()) {
+			return "";
+		}
+
+		String fieldName = columnName.trim().replace("_id", "");
+		
+		if (fieldName.matches("(\\w+_\\w+)+")) {
+			String[] words = fieldName.split("_");
+			if (words.length >= 2) {
+				StringBuilder sb = new StringBuilder();
+				
+				for (String word : words) {
+					if (!word.isEmpty()) {
+						sb.append(word);
+						sb.setCharAt(0, Character.toUpperCase(word.charAt(0)));
 					}
 				}
+				
+				fieldName = sb.toString();
 			}
 		}
+
 		return fieldName;
 	}
 
@@ -130,19 +133,6 @@ public class SqlHelper {
 
 	public static final String tableName(Class<?> c1, Class<?> c2) {
 		return getTableName(c1, c2);
-	}
-
-	public static String getClassName(String field) {
-		String className = "";
-		field = field == null ? "" : field;
-		if (!field.isEmpty()) {
-
-		}
-		return className;
-	}
-
-	public static String className(String field) {
-		return getClassName(field);
 	}
 
 }

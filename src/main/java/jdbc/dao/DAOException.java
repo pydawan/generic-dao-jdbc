@@ -5,7 +5,7 @@ package jdbc.dao;
  * @version v1.0.0
  * @since v1.0.0
  */
-public class DAOException extends RuntimeException {
+public class DAOException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 

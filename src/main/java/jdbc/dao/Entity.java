@@ -19,9 +19,9 @@ public abstract class Entity implements Comparable<Entity>, Serializable {
 	protected String tableName;
 
 	public Entity() {
-		id = null;
 		persisted = false;
 		Table tableAnnotation = this.getClass().getAnnotation(Table.class);
+		
 		if (tableName != null) {
 			tableName = tableAnnotation.name();
 		} else {
