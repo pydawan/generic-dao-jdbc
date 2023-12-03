@@ -6,13 +6,13 @@ package jdbc.dao;
  * @since v1.0.0
  */
 public class PessoaDAO extends DAO<Pessoa> {
-   
-   public PessoaDAO() {
-      super();
-   }
-   
-   public PessoaDAO(DataSource dataSource) {
-      super(dataSource);
-   }
-   
+
+	public PessoaDAO() {
+		super();
+	}
+
+	public PessoaDAO(DataSource dataSource) {
+		super(dataSource);
+	}
+
 }
