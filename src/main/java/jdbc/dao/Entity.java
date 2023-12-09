@@ -20,13 +20,7 @@ public abstract class Entity implements Comparable<Entity>, Serializable {
 
 	public Entity() {
 		persisted = false;
-		Table tableAnnotation = this.getClass().getAnnotation(Table.class);
-		
-		if (tableName != null) {
-			tableName = tableAnnotation.name();
-		} else {
-			tableName = SqlHelper.getTableName(this.getClass());
-		}
+		tableName = SqlHelper.getTableName(this.getClass());
 	}
 
 	@Override
@@ -50,7 +44,7 @@ public abstract class Entity implements Comparable<Entity>, Serializable {
 			return false;
 		if (!this.persisted() && other.persisted)
 			return false;
-		if (this.id != other.id)
+		if (!this.id.equals(other.id))
 			return false;
 		return true;
 	}
